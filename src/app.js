@@ -1,4 +1,4 @@
-import express, { json } from "express"; //Importando o express, json do Express
+import express from "express"; //Importando o express, json do Express
 import cors from "cors";
 import authRouter from "./routes/authRouter.js";
 
