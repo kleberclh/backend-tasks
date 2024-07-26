@@ -5,6 +5,9 @@ import { hashPassword } from "../repositories/passwordUtils.js";
 
 const prisma = new PrismaClient();
 
+async function todos(req, res) {
+  return res.json("hello world");
+}
 async function geral(req, res) {
   try {
     const allUsers = await prisma.user.findMany();
@@ -76,4 +79,5 @@ export default {
   signup,
   sigin,
   geral,
+  todos,
 };
