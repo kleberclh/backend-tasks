@@ -4,10 +4,10 @@
   "type": "module",
   "main": "index.js",
   "engines": {
-    "node": "20.x"
+    "node": "18.x"
   },
   "scripts": {
-    "build": "prisma generate && next build"
+    "build": "prisma generate && node server.js"
   },
   "keywords": [],
   "author": "",
