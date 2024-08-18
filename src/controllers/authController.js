@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 async function todos(req, res) {
   return res.json("hello world");
 }
-async function geral(req, res) {
+async function usuarios(req, res) {
   try {
     const allUsers = await prisma.user.findMany();
     res.status(200).json(allUsers);
@@ -17,25 +17,26 @@ async function geral(req, res) {
   }
 }
 
-async function signup(req, res) {
-  const { name, username, email, password } = req.body;
+// REGISTRA O USUARIO
+async function registrar(req, res) {
+  const { name, email, password } = req.body;
   const hashedPassword = await hashPassword(password);
   try {
     const user = await prisma.user.create({
       data: {
         name,
-        username,
         email,
         password: hashedPassword,
       },
     });
-    res.status(200).send({ message: "User created successfully", user });
-  } catch (error) {
-    res.status(400).send({ message: "Error creating user", error });
+    res.status(201).json(user);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 }
 
-async function sigin(req, res) {
+//FAZ LOGIN NESSA PORRA
+async function login(req, res) {
   try {
     // 1. Extrai o email e a senha do corpo (body) da requisição
     const { email, password } = req.body;
@@ -67,17 +68,38 @@ async function sigin(req, res) {
       { expiresIn: "1h" }
     );
 
-    // 6. Retorna o token como resposta da requisição
-    res.json({ token });
+    // 6. Retorna o token e o ID do usuário como resposta da requisição
+    res.json({ token, userId: user.id });
   } catch (error) {
     // 7. Caso ocorra algum erro durante o processo, retorna o erro com um status 400 (Bad Request)
     res.status(400).json({ message: error.message });
   }
 }
 
+// BUSCA UM USUARIO
+async function umUsuario(req, res) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: parseInt(req.params.id),
+      },
+      include: {
+        tasks: true,
+      },
+    });
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
 export default {
-  signup,
-  sigin,
-  geral,
+  registrar,
+  login,
+  usuarios,
   todos,
+  umUsuario,
 };

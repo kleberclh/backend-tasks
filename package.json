@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",
-  "engines": {
-    "node": "18.x"
-  },
   "scripts": {
     "build": "prisma generate && node server.js",
     "start": "nodemon server.js"
@@ -22,6 +19,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
+    "mariadb": "^3.3.1",
     "multer": "^1.4.5-lts.1",
     "prisma": "^5.17.0"
   },
