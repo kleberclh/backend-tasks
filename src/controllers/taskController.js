@@ -15,7 +15,7 @@ async function registrar(req, res) {
       data: {
         title,
         description,
-        userId: parseInt(req.params.id),
+        userId: req.user.id,
       },
     });
     res.status(201).json(task);
