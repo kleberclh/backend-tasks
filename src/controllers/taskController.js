@@ -37,7 +37,21 @@ async function listar(req, res) {
   }
 }
 
+async function listarMeusTasks(req, res) {
+  try {
+    const tasks = await prisma.task.findMany({
+      where: {
+        userId: req.user.id,
+      },
+    });
+    res.json(tasks);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
 export default {
   registrar,
   listar,
+  listarMeusTasks,
 };
