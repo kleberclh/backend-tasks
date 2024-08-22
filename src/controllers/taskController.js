@@ -15,7 +15,7 @@ async function registrar(req, res) {
       data: {
         title,
         description,
-        userId: req.user.id,
+        userId: parseInt(req.params.id),
       },
     });
     res.status(201).json(task);
@@ -37,21 +37,10 @@ async function listar(req, res) {
   }
 }
 
-async function listarMeusTasks(req, res) {
-  try {
-    const tasks = await prisma.task.findMany({
-      where: {
-        userId: req.user.id,
-      },
-    });
-    res.json(tasks);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-}
+
 
 export default {
   registrar,
   listar,
-  listarMeusTasks,
+  
 };

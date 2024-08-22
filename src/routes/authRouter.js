@@ -8,6 +8,7 @@ authRouter.post("/registrar", authController.registrar);
 authRouter.post("/login", authController.login);
 authRouter.get("/users", authController.usuarios);
 authRouter.get("/users/:id", authController.umUsuario);
+authRouter.put("/users/:id", authenticateToken, authController.editarUsuario);
 authRouter.get("/me", authenticateToken, authController.me);
 
 export default authRouter;

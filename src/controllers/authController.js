@@ -97,6 +97,41 @@ async function umUsuario(req, res) {
   }
 }
 
+// EDITA O USUARIO
+async function editarUsuario(req, res) {
+  try {
+    const { id } = req.params;
+    const { name, email, password } = req.body;
+
+    // Verifica se o usuário existe
+    const user = await prisma.user.findUnique({
+      where: {
+        id: parseInt(req.params.id),
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    // Atualiza os dados do usuário
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: parseInt(req.params.id),
+      },
+      data: {
+        name,
+        email,
+        password: await hashPassword(password),
+      },
+    });
+
+    res.status(200).json(updatedUser);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
 async function me(req, res) {
   try {
     const user = await prisma.user.findUnique({
@@ -124,5 +159,6 @@ export default {
   usuarios,
   todos,
   umUsuario,
+  editarUsuario,
   me,
 };
