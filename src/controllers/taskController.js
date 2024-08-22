@@ -39,6 +39,7 @@ async function listar(req, res) {
 
 async function listarMeusTasks(req, res) {
   try {
+    console.log("req.user:", req.user);
     const tasks = await prisma.task.findMany({
       where: {
         userId: req.user.id,
