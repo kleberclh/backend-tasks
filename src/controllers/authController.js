@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt"; // Adicione esta linha
 import { hashPassword } from "../repositories/passwordUtils.js";
+import authenticateToken from "../middleware/authenticateToken.js";
 
 const prisma = new PrismaClient();
 
@@ -96,10 +97,32 @@ async function umUsuario(req, res) {
   }
 }
 
+async function me(req, res) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.user.userId,
+      },
+      include: {
+        tasks: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
 export default {
   registrar,
   login,
   usuarios,
   todos,
   umUsuario,
+  me,
 };
