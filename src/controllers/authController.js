@@ -63,11 +63,9 @@ async function login(req, res) {
     }
 
     // 5. Gera um token JWT (JSON Web Token) com as informações do usuário
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      process.env.SECRET,
-      { expiresIn: "1h" }
-    );
+    const token = jwt.sign({ id: user.id }, process.env.SECRET, {
+      expiresIn: "1h",
+    });
 
     // 6. Retorna o token e o ID do usuário como resposta da requisição
     res.json({ token, userId: user.id });

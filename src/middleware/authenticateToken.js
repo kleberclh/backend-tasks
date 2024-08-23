@@ -12,7 +12,7 @@ const authenticateToken = (req, res, next) => {
     if (err) {
       return res.status(403).json({ message: "Failed to authenticate token" });
     }
-    req.user = user;
+    req.user = user; // Certifique-se de que user.id está presente
     next();
   });
 };
