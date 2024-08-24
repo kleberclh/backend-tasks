@@ -104,7 +104,7 @@ async function editarUsuario(req, res) {
     // Verifica se o usuário existe
     const user = await prisma.user.findUnique({
       where: {
-        id: parseInt(req.params.id),
+        id: parseInt(id),
       },
     });
 
@@ -112,32 +112,51 @@ async function editarUsuario(req, res) {
       return res.status(404).json({ message: "Usuário não encontrado" });
     }
 
+    // Preparar dados para atualização
+    const updatedData = { name, email };
+
+    // Atualiza a senha somente se uma nova senha for fornecida
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updatedData.password = hashedPassword;
+    }
+
     // Atualiza os dados do usuário
     const updatedUser = await prisma.user.update({
       where: {
-        id: parseInt(req.params.id),
+        id: parseInt(id),
       },
-      data: {
-        name,
-        email,
-        password: await hashPassword(password),
-      },
+      data: updatedData,
     });
 
     res.status(200).json(updatedUser);
   } catch (err) {
+    console.error("Erro ao editar usuário:", err.message);
     res.status(500).json({ message: err.message });
   }
 }
 
 async function me(req, res) {
   try {
+    const userId = req.user.id; // Verifique se o ID do usuário está correto
+
+    if (!userId) {
+      return res
+        .status(400)
+        .json({ message: "User ID is missing from the token" });
+    }
+
     const user = await prisma.user.findUnique({
       where: {
-        id: req.user.userId,
+        id: userId,
       },
       include: {
-        tasks: true,
+        tasks: true, // Tarefas diretas do usuário, se existir
+        projects: {
+          include: {
+            tarefas: true, // Inclui as tarefas dentro de cada projeto
+          },
+        },
       },
     });
 

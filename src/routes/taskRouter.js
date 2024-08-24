@@ -4,8 +4,11 @@ import authenticateToken from "../middleware/authenticateToken.js";
 
 const taskRouter = Router();
 
-taskRouter.post("/users/:id/tasks", taskController.registrar);
-taskRouter.get("/users/:id/tasks", taskController.listar);
+taskRouter.use(authenticateToken);
 
+taskRouter.post("/tasks", taskController.registrar);
+taskRouter.get("/tasks", taskController.listar);
+taskRouter.put("/tasks/:id", taskController.atualizar); // Rota para atualizar uma tarefa
+taskRouter.delete("/tasks/:id", taskController.deletar); // Rota para deletar uma tarefa
 
 export default taskRouter;
