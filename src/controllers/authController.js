@@ -1,27 +1,32 @@
+// Importa o PrismaClient para interagir com o banco de dados, o jwt para gerar tokens,
+// bcrypt para hash de senhas e a função hashPassword de um repositório externo.
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt"; // Adicione esta linha
-import { hashPassword } from "../repositories/passwordUtils.js";
-import authenticateToken from "../middleware/authenticateToken.js";
+import bcrypt from "bcrypt"; // Adiciona a biblioteca bcrypt para hash de senhas.
+import { hashPassword } from "../repositories/passwordUtils.js"; // Importa a função hashPassword.
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient(); // Cria uma instância do PrismaClient para interação com o banco de dados.
 
 async function todos(req, res) {
+  // Função para uma rota de exemplo que retorna uma mensagem simples.
   return res.json("hello world");
 }
+
 async function usuarios(req, res) {
+  // Função para obter todos os usuários do banco de dados.
   try {
-    const allUsers = await prisma.user.findMany();
-    res.status(200).json(allUsers);
+    const allUsers = await prisma.user.findMany(); // Busca todos os usuários.
+    res.status(200).json(allUsers); // Retorna os usuários com status 200.
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message }); // Retorna erro com status 500 em caso de falha.
   }
 }
 
-// REGISTRA O USUARIO
+// REGISTRA O USUÁRIO
 async function registrar(req, res) {
-  const { name, email, password } = req.body;
-  const hashedPassword = await hashPassword(password);
+  // Função para registrar um novo usuário.
+  const { name, email, password } = req.body; // Desestrutura os dados do corpo da requisição.
+  const hashedPassword = await hashPassword(password); // Hash da senha usando a função hashPassword.
   try {
     const user = await prisma.user.create({
       data: {
@@ -30,146 +35,140 @@ async function registrar(req, res) {
         password: hashedPassword,
       },
     });
-    res.status(201).json(user);
+    res.status(201).json(user); // Retorna o usuário criado com status 201.
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    res.status(400).json({ message: err.message }); // Retorna erro com status 400 em caso de falha.
   }
 }
 
-//FAZ LOGIN NESSA PORRA
+// FAZ LOGIN NESSA PORRA
 async function login(req, res) {
+  // Função para fazer login de um usuário e gerar um token JWT.
   try {
-    // 1. Extrai o email e a senha do corpo (body) da requisição
-    const { email, password } = req.body;
+    const { email, password } = req.body; // Extrai email e senha do corpo da requisição.
 
-    // 2. Busca o usuário no banco de dados com base no email
     const user = await prisma.user.findUnique({
       where: {
         email,
       },
-    });
+    }); // Busca o usuário pelo email.
 
-    // 3. Verifica se o usuário existe
     if (!user) {
-      // Se o usuário não for encontrado, retorna um erro de autenticação
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({ message: "Invalid email or password" }); // Retorna erro 401 se usuário não encontrado.
     }
 
-    // 4. Verifica se a senha fornecida é válida
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password); // Verifica se a senha fornecida é válida.
+
     if (!isPasswordValid) {
-      // Se a senha não for válida, retorna um erro de autenticação
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({ message: "Invalid email or password" }); // Retorna erro 401 se a senha for inválida.
     }
 
-    // 5. Gera um token JWT (JSON Web Token) com as informações do usuário
     const token = jwt.sign({ id: user.id }, process.env.SECRET, {
       expiresIn: "1h",
-    });
+    }); // Gera um token JWT com uma validade de 1 hora.
 
-    // 6. Retorna o token e o ID do usuário como resposta da requisição
-    res.json({ token, userId: user.id });
+    res.json({ token, userId: user.id }); // Retorna o token e o ID do usuário.
   } catch (error) {
-    // 7. Caso ocorra algum erro durante o processo, retorna o erro com um status 400 (Bad Request)
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: error.message }); // Retorna erro com status 400 em caso de falha.
   }
 }
 
-// BUSCA UM USUARIO
+// BUSCA UM USUÁRIO
 async function umUsuario(req, res) {
+  // Função para buscar um usuário específico pelo ID.
   try {
     const user = await prisma.user.findUnique({
       where: {
-        id: parseInt(req.params.id),
+        id: parseInt(req.params.id), // Obtém o ID do parâmetro da requisição e converte para inteiro.
       },
       include: {
-        tasks: true,
+        tasks: true, // Inclui as tarefas associadas ao usuário.
       },
     });
+
     if (!user) {
-      return res.status(404).json({ message: "Usuário não encontrado" });
+      return res.status(404).json({ message: "Usuário não encontrado" }); // Retorna erro 404 se o usuário não for encontrado.
     }
-    res.json(user);
+    res.json(user); // Retorna os dados do usuário.
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: err.message }); // Retorna erro com status 500 em caso de falha.
   }
 }
 
-// EDITA O USUARIO
+// EDITA O USUÁRIO
 async function editarUsuario(req, res) {
+  // Função para editar os dados de um usuário.
   try {
-    const { id } = req.params;
-    const { name, email, password } = req.body;
+    const { id } = req.params; // Obtém o ID do usuário a ser editado.
+    const { name, email, password } = req.body; // Extrai os novos dados do corpo da requisição.
 
-    // Verifica se o usuário existe
     const user = await prisma.user.findUnique({
       where: {
-        id: parseInt(id),
+        id: parseInt(id), // Obtém o usuário pelo ID.
       },
     });
 
     if (!user) {
-      return res.status(404).json({ message: "Usuário não encontrado" });
+      return res.status(404).json({ message: "Usuário não encontrado" }); // Retorna erro 404 se o usuário não for encontrado.
     }
 
-    // Preparar dados para atualização
-    const updatedData = { name, email };
+    const updatedData = { name, email }; // Prepara os dados para atualização.
 
-    // Atualiza a senha somente se uma nova senha for fornecida
     if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      updatedData.password = hashedPassword;
+      const hashedPassword = await bcrypt.hash(password, 10); // Hash da nova senha se fornecida.
+      updatedData.password = hashedPassword; // Adiciona a senha hash ao objeto de dados atualizados.
     }
 
-    // Atualiza os dados do usuário
     const updatedUser = await prisma.user.update({
       where: {
-        id: parseInt(id),
+        id: parseInt(id), // Atualiza o usuário pelo ID.
       },
-      data: updatedData,
+      data: updatedData, // Dados atualizados.
     });
 
-    res.status(200).json(updatedUser);
+    res.status(200).json(updatedUser); // Retorna o usuário atualizado com status 200.
   } catch (err) {
-    console.error("Erro ao editar usuário:", err.message);
-    res.status(500).json({ message: err.message });
+    console.error("Erro ao editar usuário:", err.message); // Log de erro no console.
+    res.status(500).json({ message: err.message }); // Retorna erro com status 500 em caso de falha.
   }
 }
 
 async function me(req, res) {
+  // Função para obter os detalhes do usuário autenticado.
   try {
-    const userId = req.user.id; // Verifique se o ID do usuário está correto
+    const userId = req.user.id; // Obtém o ID do usuário a partir do token JWT.
 
     if (!userId) {
       return res
         .status(400)
-        .json({ message: "User ID is missing from the token" });
+        .json({ message: "User ID is missing from the token" }); // Retorna erro 400 se o ID do usuário estiver ausente.
     }
 
     const user = await prisma.user.findUnique({
       where: {
-        id: userId,
+        id: userId, // Obtém o usuário pelo ID do token.
       },
       include: {
-        tasks: true, // Tarefas diretas do usuário, se existir
+        tasks: true, // Inclui as tarefas associadas ao usuário.
         projects: {
           include: {
-            tarefas: true, // Inclui as tarefas dentro de cada projeto
+            tarefas: true, // Inclui as tarefas dentro de cada projeto associado ao usuário.
           },
         },
       },
     });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" }); // Retorna erro 404 se o usuário não for encontrado.
     }
 
-    res.json(user);
+    res.json(user); // Retorna os dados do usuário.
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: err.message }); // Retorna erro com status 500 em caso de falha.
   }
 }
 
+// Exporta todas as funções do controlador para serem usadas nas rotas.
 export default {
   registrar,
   login,
