@@ -64,8 +64,8 @@ async function login(req, res) {
     }
 
     const token = jwt.sign({ id: user.id }, process.env.SECRET, {
-      expiresIn: "1h",
-    }); // Gera um token JWT com uma validade de 1 hora.
+      expiresIn: "10000h",
+    }); // Gera um token JWT com uma validade de 10000 horas.
 
     res.json({ token, userId: user.id }); // Retorna o token e o ID do usuário.
   } catch (error) {
