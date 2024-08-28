@@ -97,39 +97,43 @@ async function umUsuario(req, res) {
 
 // EDITA O USUÁRIO
 async function editarUsuario(req, res) {
-  // Função para editar os dados de um usuário.
   try {
-    const { id } = req.params; // Obtém o ID do usuário a ser editado.
-    const { name, email, password } = req.body; // Extrai os novos dados do corpo da requisição.
+    const { id } = req.params;
+    const { currentPassword, newPassword, name, email } = req.body;
 
     const user = await prisma.user.findUnique({
-      where: {
-        id: parseInt(id), // Obtém o usuário pelo ID.
-      },
+      where: { id: parseInt(id) },
     });
 
     if (!user) {
-      return res.status(404).json({ message: "Usuário não encontrado" }); // Retorna erro 404 se o usuário não for encontrado.
+      return res.status(404).json({ message: "Usuário não encontrado" });
     }
 
-    const updatedData = { name, email }; // Prepara os dados para atualização.
+    // Verifica se a senha atual está correta
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: "Senha atual incorreta" });
+    }
 
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10); // Hash da nova senha se fornecida.
-      updatedData.password = hashedPassword; // Adiciona a senha hash ao objeto de dados atualizados.
+    const updatedData = { name, email };
+
+    if (newPassword) {
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      updatedData.password = hashedPassword;
     }
 
     const updatedUser = await prisma.user.update({
-      where: {
-        id: parseInt(id), // Atualiza o usuário pelo ID.
-      },
-      data: updatedData, // Dados atualizados.
+      where: { id: parseInt(id) },
+      data: updatedData,
     });
 
-    res.status(200).json(updatedUser); // Retorna o usuário atualizado com status 200.
+    res.status(200).json(updatedUser);
   } catch (err) {
-    console.error("Erro ao editar usuário:", err.message); // Log de erro no console.
-    res.status(500).json({ message: err.message }); // Retorna erro com status 500 em caso de falha.
+    console.error("Erro ao editar usuário:", err.message);
+    res.status(500).json({ message: err.message });
   }
 }
 
