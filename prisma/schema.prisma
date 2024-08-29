@@ -18,7 +18,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("user") // Map model to table name "user"
+
 }
 
 model Task {
@@ -29,7 +29,7 @@ model Task {
   status      String   @default("pendente")
   user        User     @relation(fields: [userId], references: [id])
 
-  @@map("task") // Map model to table name "task"
+ 
 }
 
 model Project {
@@ -41,7 +41,7 @@ model Project {
   user      User      @relation(fields: [userId], references: [id])
   tarefas   Tarefa[]
 
-  @@map("project") // Map model to table name "project"
+ 
 }
 
 model Tarefa {
@@ -54,5 +54,5 @@ model Tarefa {
   updatedAt   DateTime  @updatedAt
   project     Project   @relation(fields: [projectId], references: [id])
 
-  @@map("tarefa") // Map model to table name "tarefa"
+ 
 }
