@@ -8,43 +8,43 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
-model user {
+model User {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
   password  String 
-  tasks     task[]
-  projects  project[]
+  tasks     Task[]
+  projects  Project[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("user") // Map model to table name "user"
 }
 
-model task {
+model Task {
   id          Int      @id @default(autoincrement())
   title       String
   description String
   userId      Int
   status      String   @default("pendente")
-  user        user     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
 
   @@map("task") // Map model to table name "task"
 }
 
-model project {
+model Project {
   id        Int       @id @default(autoincrement())
   name      String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   userId    Int
-  user      user      @relation(fields: [userId], references: [id])
-  tarefas   tarefa[]
+  user      User      @relation(fields: [userId], references: [id])
+  tarefas   Tarefa[]
 
   @@map("project") // Map model to table name "project"
 }
 
-model tarefa {
+model Tarefa {
   id          Int       @id @default(autoincrement())
   name        String
   description String
@@ -52,7 +52,7 @@ model tarefa {
   projectId   Int
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  project     project   @relation(fields: [projectId], references: [id])
+  project     Project   @relation(fields: [projectId], references: [id])
 
   @@map("tarefa") // Map model to table name "tarefa"
 }
