@@ -75,98 +75,96 @@ async function login(req, res) {
 
 // BUSCA UM USUÁRIO
 async function umUsuario(req, res) {
+  // Função para buscar um usuário específico pelo ID.
   try {
     const user = await prisma.user.findUnique({
       where: {
-        id: parseInt(req.params.id),
+        id: parseInt(req.params.id), // Obtém o ID do parâmetro da requisição e converte para inteiro.
       },
       include: {
-        tasks: true, // Relacionamento definido como "tasks" no modelo User
+        tasks: true, // Inclui as tarefas associadas ao usuário.
       },
     });
 
     if (!user) {
-      return res.status(404).json({ message: "Usuário não encontrado" });
+      return res.status(404).json({ message: "Usuário não encontrado" }); // Retorna erro 404 se o usuário não for encontrado.
     }
-    res.json(user);
+    res.json(user); // Retorna os dados do usuário.
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: err.message }); // Retorna erro com status 500 em caso de falha.
   }
 }
 
 // EDITA O USUÁRIO
 async function editarUsuario(req, res) {
+  // Função para editar os dados de um usuário.
   try {
-    const { id } = req.params;
-    const { currentPassword, newPassword, name, email } = req.body;
+    const { id } = req.params; // Obtém o ID do usuário a ser editado.
+    const { name, email, password } = req.body; // Extrai os novos dados do corpo da requisição.
 
     const user = await prisma.user.findUnique({
-      where: { id: parseInt(id) },
+      where: {
+        id: parseInt(id), // Obtém o usuário pelo ID.
+      },
     });
 
     if (!user) {
-      return res.status(404).json({ message: "Usuário não encontrado" });
+      return res.status(404).json({ message: "Usuário não encontrado" }); // Retorna erro 404 se o usuário não for encontrado.
     }
 
-    // Verifica se a senha atual está correta
-    const isPasswordValid = await bcrypt.compare(
-      currentPassword,
-      user.password
-    );
-    if (!isPasswordValid) {
-      return res.status(400).json({ message: "Senha atual incorreta" });
-    }
+    const updatedData = { name, email }; // Prepara os dados para atualização.
 
-    const updatedData = { name, email };
-
-    if (newPassword) {
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-      updatedData.password = hashedPassword;
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10); // Hash da nova senha se fornecida.
+      updatedData.password = hashedPassword; // Adiciona a senha hash ao objeto de dados atualizados.
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: parseInt(id) },
-      data: updatedData,
+      where: {
+        id: parseInt(id), // Atualiza o usuário pelo ID.
+      },
+      data: updatedData, // Dados atualizados.
     });
 
-    res.status(200).json(updatedUser);
+    res.status(200).json(updatedUser); // Retorna o usuário atualizado com status 200.
   } catch (err) {
-    console.error("Erro ao editar usuário:", err.message);
-    res.status(500).json({ message: err.message });
+    console.error("Erro ao editar usuário:", err.message); // Log de erro no console.
+    res.status(500).json({ message: err.message }); // Retorna erro com status 500 em caso de falha.
   }
 }
 
 async function me(req, res) {
+  // Função para obter os detalhes do usuário autenticado.
   try {
-    const userId = req.user.id;
+    const userId = req.user.id; // Obtém o ID do usuário a partir do token JWT.
 
     if (!userId) {
       return res
         .status(400)
-        .json({ message: "User ID is missing from the token" });
+        .json({ message: "User ID is missing from the token" }); // Retorna erro 400 se o ID do usuário estiver ausente.
     }
 
     const user = await prisma.user.findUnique({
       where: {
-        id: userId,
+        id: userId, // Obtém o usuário pelo ID do token.
       },
       include: {
-        tasks: true,
+        tasks: true, // Inclui as tarefas associadas ao usuário.
         projects: {
           include: {
-            tarefas: true,
+            tarefas: true, // Inclui as tarefas dentro de cada projeto associado ao usuário.
           },
         },
       },
     });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" }); // Retorna erro 404 se o usuário não for encontrado.
     }
 
-    res.json(user);
+    res.json(user); // Retorna os dados do usuário.
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: err.message }); // Retorna erro com status 500 em caso de falha.
   }
 }
 
