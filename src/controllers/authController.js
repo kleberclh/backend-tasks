@@ -75,23 +75,22 @@ async function login(req, res) {
 
 // BUSCA UM USUÁRIO
 async function umUsuario(req, res) {
-  // Função para buscar um usuário específico pelo ID.
   try {
     const user = await prisma.user.findUnique({
       where: {
-        id: parseInt(req.params.id), // Obtém o ID do parâmetro da requisição e converte para inteiro.
+        id: parseInt(req.params.id),
       },
       include: {
-        tasks: true, // Inclui as tarefas associadas ao usuário.
+        tasks: true, // Relacionamento definido como "tasks" no modelo User
       },
     });
 
     if (!user) {
-      return res.status(404).json({ message: "Usuário não encontrado" }); // Retorna erro 404 se o usuário não for encontrado.
+      return res.status(404).json({ message: "Usuário não encontrado" });
     }
-    res.json(user); // Retorna os dados do usuário.
+    res.json(user);
   } catch (err) {
-    res.status(500).json({ message: err.message }); // Retorna erro com status 500 em caso de falha.
+    res.status(500).json({ message: err.message });
   }
 }
 
@@ -138,37 +137,36 @@ async function editarUsuario(req, res) {
 }
 
 async function me(req, res) {
-  // Função para obter os detalhes do usuário autenticado.
   try {
-    const userId = req.user.id; // Obtém o ID do usuário a partir do token JWT.
+    const userId = req.user.id;
 
     if (!userId) {
       return res
         .status(400)
-        .json({ message: "User ID is missing from the token" }); // Retorna erro 400 se o ID do usuário estiver ausente.
+        .json({ message: "User ID is missing from the token" });
     }
 
     const user = await prisma.user.findUnique({
       where: {
-        id: userId, // Obtém o usuário pelo ID do token.
+        id: userId,
       },
       include: {
-        tasks: true, // Inclui as tarefas associadas ao usuário.
+        tasks: true,
         projects: {
           include: {
-            tarefas: true, // Inclui as tarefas dentro de cada projeto associado ao usuário.
+            tarefas: true,
           },
         },
       },
     });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" }); // Retorna erro 404 se o usuário não for encontrado.
+      return res.status(404).json({ message: "User not found" });
     }
 
-    res.json(user); // Retorna os dados do usuário.
+    res.json(user);
   } catch (err) {
-    res.status(500).json({ message: err.message }); // Retorna erro com status 500 em caso de falha.
+    res.status(500).json({ message: err.message });
   }
 }
 
