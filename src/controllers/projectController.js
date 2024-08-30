@@ -99,7 +99,7 @@ async function createTarefa(req, res) {
       return res.status(404).json({ error: "Projeto não encontrado" });
     }
 
-    const tarefa = await prisma.tarefas.create({
+    const tarefa = await prisma.tarefa.create({
       data: {
         name,
         description,
@@ -128,7 +128,7 @@ async function getTarefas(req, res) {
       return res.status(404).json({ error: "Projeto não encontrado" });
     }
 
-    const tarefas = await prisma.tarefas.findMany({
+    const tarefas = await prisma.tarefa.findMany({
       where: { projectId: project.id },
     });
 
@@ -147,7 +147,7 @@ async function updateTarefa(req, res) {
 
     console.log("Atualizando tarefa:", { name, description, status }); // Adicione um log para verificar os dados recebidos
 
-    const tarefa = await prisma.tarefas.update({
+    const tarefa = await prisma.tarefa.update({
       where: { id: Number(tarefaId) },
       data: { name, description, status }, // Atualiza o status
     });
@@ -173,7 +173,7 @@ async function deleteTarefa(req, res) {
       return res.status(404).json({ error: "Projeto não encontrado" });
     }
 
-    await prisma.tarefas.delete({
+    await prisma.tarefa.delete({
       where: { id: Number(tarefaId) },
     });
 
