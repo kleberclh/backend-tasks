@@ -4,7 +4,7 @@ import app from "./src/app.js";
 
 // Define a porta na qual o servidor irá escutar.
 // A porta é obtida a partir das variáveis de ambiente (PORT) ou, se não estiver definida, usa a porta padrão 5000.
-const PORT = process.env.PORT || 5100;
+const PORT = process.env.PORT || 5000;
 
 // Inicia o servidor na porta definida e imprime uma mensagem no console indicando que o servidor está em execução.
 // A função `listen` aceita dois parâmetros: a porta e uma função de callback que é executada quando o servidor está pronto.
